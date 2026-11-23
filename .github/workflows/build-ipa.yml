@@ -1,0 +1,31 @@
+name: Build IPA
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias
+        run: |
+          pod install || true
+
+      - name: Compilar IPA
+        run: |
+          xcodebuild -project TU_PROYECTO.xcodeproj \
+            -scheme TU_PROYECTO \
+            -sdk iphoneos \
+            -configuration Release \
+            archive -archivePath build/TU_PROYECTO.xcarchive
+
+          xcodebuild -exportArchive \
+            -archivePath build/TU_PROYECTO.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist ExportOptions.plist
+
+      - name: Subir IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: mi-app
+          path: build/*.ipa
